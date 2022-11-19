@@ -1,0 +1,48 @@
+parameters:
+  condition: succeeded()
+  dependsOn: []
+  artifact: 'blogManager'
+  acrName: ''
+  chartPath: ''
+
+jobs:
+  - job: "Build_BlogManager"
+    pool :
+      vmImage: "ubuntu-latest"
+
+    steps:
+      - task: CopyFiles@2
+        displayName: '[build] Publish Dockerfile'
+        inputs:
+          sourceFolder: 'BlogManager'
+          Contents: |
+            Dockerfile
+            App/*
+            requirements.txt
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/${{parameters.artifact}}'
+
+      - task: Docker@1
+        displayName: '[build] Build docker image'
+        inputs:
+          azureSubscriptionEndpoint: travel-blog-service-connection
+          azureContainerRegistry: '${{ parameters.acrName }}'
+          dockerFile: '$(Build.ArtifactStagingDirectory)/${{parameters.artifact}}/Dockerfile'
+          imageName: 'blogmanager:$(Build.BuildNumber)'
+          includeLatestTag: true
+
+      - task: AzureCLI@2
+        displayName: '[build] Connect to acr'
+        inputs:
+          azureSubscription: travel-blog-service-connection
+          scriptType: bash
+          scriptLocation: inlineScript
+          addSpnToEnvironment: true
+          inlineScript: |
+            az acr login --name ${{ parameters.acrName }}
+            docker tag travelblogacr/blogmanager:$(Build.BuildNumber) travelblogacr.azurecr.io/blogmanager:$(Build.BuildNumber)
+            docker push travelblogacr.azurecr.io/blogmanager:$(Build.BuildNumber)
+
+      - task: HelmInstaller@1
+        displayName: Install Helm ${{ parameters.HelmVersion }}
+        inputs:
+          helmVersionInstall: 3.9.0
