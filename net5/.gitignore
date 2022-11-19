@@ -1,0 +1,12 @@
+**/appsettings.Local*.json
+.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+*.log
+**/global.json
