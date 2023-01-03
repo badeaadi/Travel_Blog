@@ -1,0 +1,26 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - Identity/
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - Identity/
+
+stages:
+  - stage: CI
+    displayName: "Build"
+    dependsOn: []
+    jobs:
+      - template: ./azure-pipelines-ci.yaml
+        parameters:
+          artifact: 'identity'
+          acrName: 'travelblogacr'

@@ -1,0 +1,42 @@
+﻿parameters:
+  condition: succeeded()
+  dependsOn: []
+  artifact: 'identity'
+
+jobs:
+  - job: "Build_identity"
+    pool :
+      vmImage: "ubuntu-latest"
+
+    steps:
+      - task: CopyFiles@2
+        displayName: '[build] Publish Dockerfile'
+        inputs:
+          sourceFolder: 'Identity'
+          Contents: |
+            Dockerfile
+            Identity/*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/${{parameters.artifact}}'
+
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: travel-blog-service-connection
+          scriptType: bash
+          scriptLocation: inlineScript
+          addSpnToEnvironment: true
+          inlineScript: |
+            az acr login --name travelblognst
+
+      - task: Docker@1
+        displayName: Build docker image
+        inputs:
+          azureSubscriptionEndpoint: travel-blog-service-connection
+          azureContainerRegistry: travelblogacr
+          dockerFile: '$(Build.ArtifactStagingDirectory)/${{parameters.artifact}}/Dockerfile'
+          imageName: '${{parameters.artifact}}:$(Build.BuildNumber)'
+          includeLatestTag: true
+#
+#      - task: Docker@1
+#        displayName: Push
+#        inputs:
+#          azureSubscriptionEndpoint: travel-blog-service-connection
