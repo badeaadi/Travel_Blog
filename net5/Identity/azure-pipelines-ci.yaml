@@ -1,42 +1,53 @@
 ﻿parameters:
-  condition: succeeded()
-  dependsOn: []
-  artifact: 'identity'
+    artifact: 'identity'
+    condition: succeeded()
+    dependsOn: []
+    name: ''
+    workingDirectory: []
 
 jobs:
-  - job: "Build_identity"
+  - job: ${{ parameters.name }}
+    condition: ${{ parameters.condition }}
+    dependsOn: ${{ parameters.dependsOn }}
+    displayName: 'Build Identity'
     pool :
       vmImage: "ubuntu-latest"
+    timeoutInMinutes: 30
 
     steps:
-      - task: CopyFiles@2
-        displayName: '[build] Publish Dockerfile'
-        inputs:
-          sourceFolder: 'Identity'
-          Contents: |
-            Dockerfile
-            Identity/*
-          TargetFolder: '$(Build.ArtifactStagingDirectory)/${{parameters.artifact}}'
+        - task: USeDotNet@2
+          displayName: 'Use .NET 6 SDK'
+          inputs:
+            packageType: sdk
+            version: 6.x
 
-      - task: AzureCLI@2
-        inputs:
-          azureSubscription: travel-blog-service-connection
-          scriptType: bash
-          scriptLocation: inlineScript
-          addSpnToEnvironment: true
-          inlineScript: |
-            az acr login --name travelblognst
+        - template: azure-pipelines-ci-build-artifact.yaml
+          parameters:
+            workingDirectory: '${{ parameters.workingDirectory }}'
 
-      - task: Docker@1
-        displayName: Build docker image
-        inputs:
-          azureSubscriptionEndpoint: travel-blog-service-connection
-          azureContainerRegistry: travelblogacr
-          dockerFile: '$(Build.ArtifactStagingDirectory)/${{parameters.artifact}}/Dockerfile'
-          imageName: '${{parameters.artifact}}:$(Build.BuildNumber)'
-          includeLatestTag: true
-#
-#      - task: Docker@1
-#        displayName: Push
-#        inputs:
-#          azureSubscriptionEndpoint: travel-blog-service-connection
+        - powershell: |
+            dotnet publish ./${{ parameters.workingDirectory }}/src/Identity.Startup/ -c Release -r linux-x64 -o $(Build.ArtifactStagingDirectory)/${{ parameters.artifact }}
+
+        - task: CopyFiles@2
+          displayName: "[Docker] Publish Dockerfile"
+          inputs:
+            SourceFolder: ${{ parameters.workingDirectory }}
+            Contents: Dockerfile
+            targetFolder: $(Build.ArtifactStagingDirectory)/${{ parameters.artifact }}
+
+        - task: Docker@1
+          displayName: "[Docker] Build image"
+          inputs:
+            azureSubscriptionEndpoint: travel-blog-service-connection
+            azureContainerRegistry: travelblogacr
+            dockerFile: '$(Build.ArtifactStagingDirectory)/${{parameters.artifact}}/Dockerfile'
+            imageName: '${{parameters.artifact}}:$(Build.BuildNumber)'
+            includeLatestTag: true
+
+#        - task: Docker@1
+#          displayName: "[Docker] Push image"
+#          inputs:
+#              azureSubscriptionEndpoint: travel-blog-service-connection
+#              azureContainerRegistry: travelblogacr
+#              command: 'Push an image'
+#              imageName: '${{parameters.artifact}}:$(Build.BuildNumber)'

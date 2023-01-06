@@ -23,4 +23,4 @@ stages:
       - template: ./azure-pipelines-ci.yaml
         parameters:
           artifact: 'identity'
-          acrName: 'travelblogacr'
+          workingDirectory: 'net5/Identity'
