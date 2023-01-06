@@ -56,7 +56,7 @@ namespace Identity.API.Services
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
+            var key = Encoding.ASCII.GetBytes(_jwtOptions.SigningKey);
             var tokenDescriptor = GenerateSecurityTokenDescriptor(newUser, key);
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -91,7 +91,7 @@ namespace Identity.API.Services
             }
             
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
+            var key = Encoding.ASCII.GetBytes(_jwtOptions.SigningKey);
             var tokenDescriptor = GenerateSecurityTokenDescriptor(existingUser, key);
 
             var token = tokenHandler.CreateToken(tokenDescriptor);

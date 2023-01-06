@@ -18,9 +18,19 @@ pr:
 stages:
   - stage: CI
     displayName: "Build"
-    dependsOn: []
+    dependsOn: [ ]
     jobs:
       - template: ./azure-pipelines-ci.yaml
-        parameters:
-          artifact: 'identity'
-          workingDirectory: 'net5/Identity'
+      - template: ./generate-config.yaml
+
+  - stage: Migrate
+    displayName: "Migrate"
+    dependsOn: [ 'CI' ]
+    jobs:
+      - template: ./migrate-database.yaml
+
+#  - stage: CD
+#    displayName: "Deploy"
+#    dependsOn: [ 'Migrate' ]
+#    jobs:
+#      - template: ./azure-pipelines-cd.yaml
