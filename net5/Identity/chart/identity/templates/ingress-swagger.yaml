@@ -9,7 +9,7 @@ spec:
     - host: travel-blog-aks.northeurope.cloudapp.azure.com
       http:
         paths:
-          - path : identity/swagger/(.*)
+          - path : /identity/swagger/(.*)
             pathType: ImplementationSpecific
             backend:
               service:

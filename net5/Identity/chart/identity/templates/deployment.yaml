@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: identity-deployment
+  name: identity
   labels:
     app: identity
 spec:
@@ -36,8 +36,9 @@ spec:
           volumeMounts:
             - name: service-secrets
               mountPath: /config/kubernetes-secrets
+              readOnly: true
       volumes:
-        - name: service-secret
+        - name: service-secrets
           secret:
-            secret-name: identity-secrets
+            secretName: identity-secrets
 

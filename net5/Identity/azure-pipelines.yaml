@@ -25,20 +25,25 @@ stages:
           artifact: 'identity'
           workingDirectory: 'net5/Identity'
 
-  - stage: Config
+  - stage: Configuration_nst
     dependsOn: [ ]
-    displayName: "Configuration"
+    displayName: "Configuration nst"
     jobs:
-      - template: ./ci.generate-config.yaml
+      - template: ./configuration/generate.yaml
 
   - stage: Migrate
     displayName: "Migrate"
-    dependsOn: [ 'CI', 'Config' ]
+    dependsOn: [ 'CI', 'Configuration_nst' ]
     jobs:
       - template: ./migrate-database.yaml
 
-#  - stage: CD
-#    displayName: "Deploy"
-#    dependsOn: [ 'Migrate' ]
-#    jobs:
-#      - template: ./azure-pipelines-cd.yaml
+  - stage: CD
+    displayName: "Deploy"
+    dependsOn: [ 'Migrate', "Configuration_nst" ]
+    jobs:
+      - template: ./azure-pipelines-cd.yaml
+        parameters:
+          artifact: 'identity'
+          workingDirectory: 'net5/Identity'
+          azureResourceGroup: 'travel-blog-nst-rg'
+          azureKubernetesCluster: 'travel-blog-nst-aks'
