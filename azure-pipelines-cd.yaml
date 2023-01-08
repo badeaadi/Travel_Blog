@@ -1,0 +1,41 @@
+parameters:
+  artifact: 'blog-manager'
+  acrName: 'travelblogacr'
+  azureResourceGroup : 'travel-blog-nst-rg'
+  azureKubernetesCluster : 'travel-blog-nst-aks'
+  chartPath: 'BlogManager/chart/blog-manager'
+
+stages:
+  - stage : "Deploy"
+    dependsOn: [CI]
+    jobs:
+      - deployment: "Deploy"
+        displayName: "Deploy"
+        environment: "nst"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: HelmInstaller@0
+                  displayName: "[install] Install helm"
+                  inputs:
+                      helmVersion: 3.9.0
+                      checkLatestHelmVersion: false
+
+                - task: AzureCli@2
+                  displayName : "[deploy] Setup K8 credentials"
+                  name: setup_kubernetes
+                  inputs:
+                    azureSubscription: travel-blog-service-connection
+                    scriptType: pscore
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      az aks get-credentials `
+                        --resource-group ${{ parameters.azureResourceGroup }} `
+                        --name ${{ parameters.azureKubernetesCluster }} --overwrite-existing
+
+                - script: |
+                    helm upgrade ${{ parameters.artifact }}-app ${{ parameters.chartPath }} --debug --install --timeout 300s --set buildTag=$(Build.BuildNumber)
+                  displayName: '[deploy] Helm upgrade'
