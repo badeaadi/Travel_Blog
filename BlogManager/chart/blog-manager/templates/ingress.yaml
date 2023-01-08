@@ -1,15 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: blog-manager-ingress
+  name: blog-manager
   labels:
     app: blog-manager
 spec:
   rules:
-    - host: travel-blog-nst-aks-dns-21fb16b8.hcp.northeurope.azmk8s.io
+    - host: travel-blog-aks.northeurope.cloudapp.azure.com
       http:
         paths:
-          - path : /api/(.*)
+          - path : /blog_manager/api/(.*)
             pathType: ImplementationSpecific
             backend:
               service:

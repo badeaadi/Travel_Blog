@@ -1,11 +1,12 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: blog-manager-hpa
+  name: blog-manager
   labels:
     app: blog-manager
 spec:
   scaleTargetRef:
+    apiVersion: apps/v1
     kind: Deployment
     name: blog-manager
   minReplicas: 1
