@@ -1,0 +1,35 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - BlogManager/
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - BlogManager/
+
+
+stages:
+  - stage: CI
+    displayName: "Build"
+    dependsOn: []
+    jobs:
+      - template: ./azure-pipelines-ci.yaml
+        parameters:
+          artifact: 'blog-manager'
+          acrName: 'travelblogacr'
+          chartPath: 'BlogManager/chart/blog-manager'
+
+  - template: /azure-pipelines-cd.yaml
+    parameters:
+      artifact: 'blog-manager'
+      acrName: 'travelblogacr'
+      chartPath: 'BlogManager/chart/blog-manager'
+

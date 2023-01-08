@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: blog-manager-service
+  labels:
+    app: blog-manager
+spec:
+  type: ClusterIP
+  ports:
+    - name: blogmanagerhttp
+      port: 80
+      targetPort: 5500
+  selector:
+    app.kubernetes.io/name: "blog-manager"
+    app.kubernetes.io/instance: {{ .Release.Name }}
