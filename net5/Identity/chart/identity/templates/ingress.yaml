@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: identity-ingress
+  labels:
+    app: identity
+spec:
+  rules:
+    - host: travel-blog-aks.northeurope.cloudapp.azure.com
+      http:
+        paths:
+          - path : identity/api/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: identity
+                port:
+                  number: 80

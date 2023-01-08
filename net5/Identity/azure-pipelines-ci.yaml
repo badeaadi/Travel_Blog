@@ -1,6 +1,10 @@
 ﻿parameters:
   condition: succeeded()
   dependsOn: [ ]
+  chartBaseFolder: 'chart'
+  artifact: ''
+  helmVersion: '3.3.1'
+  workingDirectory: ''
 
 jobs:
   - job: build
@@ -17,9 +21,9 @@ jobs:
           packageType: sdk
           version: 6.x
 
-      - template: build-artifact.yaml
+      - template: ci.build-artifact.yaml
         parameters:
-          workingDirectory: 'net5/Identity'
+          workingDirectory: '${{ parameters.workingDirectory }}'
 
       - powershell: |
           dotnet publish ./net5/Identity/src/Identity.Startup/ -c Release -r linux-x64 -o $(Build.ArtifactStagingDirectory)/identity
@@ -28,7 +32,7 @@ jobs:
       - task: CopyFiles@2
         displayName: "[Docker] Copy Dockerfile"
         inputs:
-          SourceFolder: 'net5/Identity'
+          SourceFolder: ${{ parameters.workingDirectory }}
           Contents: Dockerfile
           targetFolder: $(Build.ArtifactStagingDirectory)/identity
 
@@ -37,8 +41,8 @@ jobs:
         inputs:
           azureSubscriptionEndpoint: travel-blog-service-connection
           azureContainerRegistry: travelblogacr
-          dockerFile: '$(Build.ArtifactStagingDirectory)/identity/Dockerfile'
-          imageName: 'identity:$(Build.BuildNumber)'
+          dockerFile: '$(Build.ArtifactStagingDirectory)/${{ parameters.artifact }}/Dockerfile'
+          imageName: '${{ parameters.artifact }}:$(Build.BuildNumber)'
           includeLatestTag: true
 
       - task: AzureCLI@2
@@ -50,11 +54,19 @@ jobs:
           addSpnToEnvironment: true
           inlineScript: |
               az acr login --name travelblogacr
-              docker tag travelblogacr/identity:$(Build.BuildNumber) travelblogacr.azurecr.io/identity:$(Build.BuildNumber)
-              docker push travelblogacr.azurecr.io/identity:$(Build.BuildNumber)
+              docker tag travelblogacr/${{ parameters.artifact }}:$(Build.BuildNumber) travelblogacr.azurecr.io/${{ parameters.artifact }}:$(Build.BuildNumber)
+              docker push travelblogacr.azurecr.io/${{ parameters.artifact }}:$(Build.BuildNumber)
+
+      - template: ci.package-chart.yaml
+        parameters:
+          HelmVersion: ${{ parameters.helmVersion }}
+          ChartPath: ${{ parameters.WorkingDirectory }}/${{ parameters.chartBaseFolder }}/${{ parameters.artifact }}
+          ArtifactName: 'charts'
+          PathToPublish: '$(Build.ArtifactStagingDirectory)/${{ parameters.artifact }}-1.0.0.tgz'
+          ServiceName: ${{ parameters.artifact }}
 
       - powershell: |
-          dotnet publish ./net5/Identity/src/Identity.DataMigrator/ -c Release -r linux-x64 -o $(Build.ArtifactStagingDirectory)/data_migrator
+          dotnet publish './${{ parameters.workingDirectory }}/src/Identity.DataMigrator/' -c Release -r linux-x64 -o $(Build.ArtifactStagingDirectory)/data_migrator
         displayName: '[Schema] Publish dotnet artifacts for data migrator'
 
       - task: PublishPipelineArtifact@1
