@@ -1,18 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: identity-ingress
-  labels:
-    app: identity
+  name: identity-ingress-health
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/enable-cors: "false"
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /health
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/upstream-vhost: identity
 spec:
   rules:
-    - host: travel-blog-aks.northeurope.cloudapp.azure.com
+    - host: ""
       http:
         paths:
           - path : /identity/health
             pathType: ImplementationSpecific
             backend:
               service:
-                name: identity
+                name: identity-service
                 port:
                   number: 80

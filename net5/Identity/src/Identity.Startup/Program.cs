@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -11,7 +12,25 @@ namespace Identity.Startup
         
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole().AddDebug());
+            var _logger = loggerFactory.CreateLogger("Program");
+
+            try
+            {
+                _logger.LogInformation("Identity Service is starting...");
+                Console.Title = "Identity";
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Stopped program because of exception");
+                throw;
+            }
+            finally
+            {
+                loggerFactory.Dispose();
+            }
+            
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
