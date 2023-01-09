@@ -2,17 +2,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: blog-manager
-  labels:
-    app: blog-manager
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
 spec:
   rules:
-    - host: travel-blog-aks.northeurope.cloudapp.azure.com
-      http:
+    - http:
         paths:
-          - path : /blog_manager/api/(.*)
-            pathType: ImplementationSpecific
+          - path: /
             backend:
               service:
                 name: blog-manager
                 port:
                   number: 80
+            pathType: Exact
