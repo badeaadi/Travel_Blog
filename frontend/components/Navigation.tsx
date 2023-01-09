@@ -1,6 +1,9 @@
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function Navigation() {
+    const { data: session, status } = useSession()
+
     return (
         <>
             <div className="navbar bg-base-200">
@@ -25,7 +28,7 @@ export default function Navigation() {
                     </ul>
                 </div>
                 <div className="navbar-end">
-                    <div className="dropdown dropdown-end">
+                    {status === 'authenticated' && <div className="dropdown dropdown-end">
                         <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                             <div className="w-10 rounded-full">
                                 <img src="https://placeimg.com/80/80/people" alt="Profile" />
@@ -33,9 +36,10 @@ export default function Navigation() {
                         </label>
                         <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
                             <li><Link href="/profile">Profile</Link></li>
-                            <li><a>Logout</a></li>
+                            <li onClick={() => signOut()}><a>Logout</a></li>
                         </ul>
-                    </div>
+                    </div>}
+                    {status === 'unauthenticated' && <Link href="/auth/login"><button className="btn btn-primary">Login</button></Link>}
                 </div>
             </div>
         </>
