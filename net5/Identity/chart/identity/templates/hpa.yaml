@@ -6,6 +6,7 @@ metadata:
     app: identity
 spec:
   scaleTargetRef:
+    apiVersion: apps/v1
     kind: Deployment
     name: identity
   minReplicas: 1
