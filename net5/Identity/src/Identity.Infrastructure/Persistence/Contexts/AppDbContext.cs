@@ -14,6 +14,8 @@ namespace Identity.Infrastructure.Persistence.Contexts
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.HasDefaultSchema("identity");
+            
             base.OnModelCreating(builder);
             
             builder.Entity<ApiUser>(entity => entity.Property(m => m.Id).HasMaxLength(85));

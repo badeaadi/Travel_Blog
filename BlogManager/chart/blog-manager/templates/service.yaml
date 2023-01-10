@@ -10,6 +10,7 @@ spec:
     - name: blogmanagerhttp
       port: 80
       targetPort: 5500
+      protocol: TCP
   selector:
     app.kubernetes.io/name: "blog-manager"
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: "blog-manager"
