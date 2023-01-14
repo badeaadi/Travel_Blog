@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Identity.API.RequestObjects;
-using Identity.API.ResultObjects;
+using Identity.Domain.Dtos;
 
 namespace Identity.API.Services
 {
@@ -8,5 +8,6 @@ namespace Identity.API.Services
     {
         Task<AuthenticationResult> RegisterAsync(UserRegistrationRequest request);
         Task<AuthenticationResult> LoginAsync(UserLoginRequest request);
+        Task<ApiUserDto> GetUserByIdAsync(string userId);
     }
 }
