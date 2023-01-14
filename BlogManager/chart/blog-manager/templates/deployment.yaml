@@ -40,3 +40,6 @@ spec:
               path: /api/health
               port: http
             timeoutSeconds: 30
+          env:
+            - name: CosmosDbAccountKey
+              value: {{ .Values.CosmosDbAccountKey }}

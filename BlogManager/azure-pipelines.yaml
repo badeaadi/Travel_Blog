@@ -27,7 +27,7 @@ stages:
           acrName: 'travelblogacr'
           chartPath: 'BlogManager/chart/blog-manager'
 
-  - template: /azure-pipelines-cd.yaml
+  - template: ./azure-pipelines-cd.yaml
     parameters:
       artifact: 'blog-manager'
       acrName: 'travelblogacr'
