@@ -4,6 +4,8 @@ import Link from "next/link";
 export default function Navigation() {
     const { data: session, status } = useSession()
 
+    console.log(session);
+
     return (
         <>
             <div className="navbar bg-base-200">

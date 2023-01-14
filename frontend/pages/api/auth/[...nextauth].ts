@@ -1,5 +1,8 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import axios from 'axios';
+import jwt from 'jsonwebtoken';
+import { BASE_URL, User } from "../../../types";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -16,13 +19,14 @@ export const authOptions: AuthOptions = {
             }
         },
         async authorize(credentials, req) {
-
-            // Replace with micro call
-            const user = {id: "1", firstName: "test", lastName: "testescu", email: "test@gmail.com"}
-
-            if (user) {
-                return user;
-            } else {
+            try {
+                const res: any = await axios.post(`${BASE_URL}/api/User/login`, credentials);
+                const userData = (jwt.decode(res.data.token) as User);
+                return ({
+                    ...userData,
+                    jwt: res.data.token
+                })
+            } catch (error) {
                 return null;
             }
         }
