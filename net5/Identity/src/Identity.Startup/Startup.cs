@@ -84,6 +84,7 @@ namespace Identity.Startup
         private void ConfigureContext(IServiceCollection services)
         {
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITokenService, TokenService>();
 
             services.Configure<JwtOptions>(Configuration.GetSection(nameof(JwtOptions)));
         }

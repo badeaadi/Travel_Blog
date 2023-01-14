@@ -1,0 +1,82 @@
+parameters:
+  condition: succeeded()
+  dependsOn: [ ]
+  configurationSecrets: $[ stageDependencies.Configuration_nst.configuration_nst.outputs['configuration_nst.printSecrets.secrets'] ]
+  chartBaseFolder: 'chart'
+  artifact: ''
+  artifactDownloadPath: $(PIPELINE.WORKSPACE)/resourceCI
+  helmVersion: '3.3.1'
+  azureResourceGroup: ''
+  azureKubernetesCluster: ''
+  workingDirectory: ''
+
+jobs:
+  - deployment: deploy_nst
+    displayName: "Deploy"
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: ${{ parameters.condition }}
+    pool:
+      vmImage: "ubuntu-latest"
+    variables:
+      configurationSecrets: ${{ parameters.configurationSecrets }}
+    environment: "nst"
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: DownloadPipelineArtifact@2
+              displayName: "[Deploy] Download helm artifacts"
+              inputs:
+                artifact: 'charts'
+                path: '${{ parameters.artifactDownloadPath }}/charts'
+
+            - task: HelmInstaller@1
+              displayName: "[Helm] Install version ${{ parameters.helmVersion }}"
+              inputs:
+                helmVersion: ${{ parameters.helmVersion }}
+
+            - task: PowerShell@2
+              displayName: '[Configure] Generate configuration files'
+              inputs:
+                pwsh: true
+                targetType: inline
+                script: |
+                  Write-Host "Looking for secrets for nst"
+                  
+                  $yaml = "$(configurationSecrets)"
+                  
+                  if (!$yaml) {
+                    Write-Host "No configuration for secrets found!"
+                  } else {
+                    Write-Host "Secrets found!"
+                  
+                    $yamlDecoded = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($yaml))
+                    $output = "${{ parameters.artifactDownloadPath }}/charts/secrets.yml"
+                  
+                    Out-File -FilePath $output -InputObject $yamlDecoded.Trim() -Encoding ASCII
+                  }
+
+            - task: AzureCLI@2
+              displayName: "[Deploy] Setup AKS credentials"
+              name: setup_kubernetes
+              inputs:
+                azureSubscription: travel-blog-service-connection
+                scriptType: pscore
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az aks get-credentials `
+                    --resource-group ${{ parameters.azureResourceGroup }} `
+                    --name ${{ parameters.azureKubernetesCluster }} --overwrite-existing
+
+            - task: AzureCLI@2
+              displayName: "[Deploy] Rollout"
+              name: rollout
+              inputs:
+                azureSubscription: travel-blog-service-connection
+                scriptType: pscore
+                scriptLocation: inlineScript
+                inlineScript: |
+                  $secrets_file = "${{ parameters.artifactDownloadPath }}/charts/secrets.yml"
+                  
+                  helm upgrade -f $secrets_file ${{ parameters.artifact }}-app ${{ parameters.artifactDownloadPath }}/charts/${{ parameters.artifact }}-1.0.0.tgz `
+                  --debug --install --timeout 300s --set buildTag=$(Build.BuildNumber)

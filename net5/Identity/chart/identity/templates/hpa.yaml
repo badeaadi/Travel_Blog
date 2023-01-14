@@ -1,14 +1,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: blog-manager
+  name: identity-hpa
   labels:
-    app: blog-manager
+    app: identity
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: blog-manager
+    name: identity
   minReplicas: 1
   maxReplicas: 3
   metrics:

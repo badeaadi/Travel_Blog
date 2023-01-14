@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.Startup", "src\Ide
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.Domain", "src\Identity.Domain\Identity.Domain.csproj", "{020F6209-D1EB-4DE7-B602-80CB68B2D670}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.DataMigrator", "src\Identity.DataMigrator\Identity.DataMigrator.csproj", "{5A0966EE-1E15-4F80-903C-F82DAF9A2B6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{020F6209-D1EB-4DE7-B602-80CB68B2D670}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{020F6209-D1EB-4DE7-B602-80CB68B2D670}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{020F6209-D1EB-4DE7-B602-80CB68B2D670}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A0966EE-1E15-4F80-903C-F82DAF9A2B6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A0966EE-1E15-4F80-903C-F82DAF9A2B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A0966EE-1E15-4F80-903C-F82DAF9A2B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A0966EE-1E15-4F80-903C-F82DAF9A2B6A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

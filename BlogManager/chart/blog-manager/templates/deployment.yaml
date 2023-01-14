@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: blog-manager-deployment
+  name: blog-manager
   labels:
     app: blog-manager
 spec:
@@ -15,21 +15,28 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: "blog-manager"
+        app: "blog-manager"
     spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "travelblogacr.azurecr.io/blogmanager:{{ .Values.buildTag }}"
+          resources:
+            requests:
+              cpu: '50m'
+              memory: '100Mi'
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 80
+            - name: http
+              containerPort: 5500
+              protocol: TCP
           livenessProbe:
             httpGet:
               path: /api/health
-              port: 5500
+              port: http
             initialDelaySeconds: 5
             periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /api/health
-              port: 5500
+              port: http
             timeoutSeconds: 30

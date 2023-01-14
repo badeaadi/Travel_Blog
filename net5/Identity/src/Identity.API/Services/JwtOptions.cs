@@ -2,6 +2,6 @@
 {
     public class JwtOptions
     {
-        public string Secret { get; set; }
+        public string SigningKey { get; set; }
     }
 }
