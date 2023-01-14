@@ -1,12 +1,10 @@
 import flask
 from dotenv import load_dotenv
+from flask import request
 from waitress import serve
 
-import uuid
-
-from service import CosmosDb
-from util import _verify_create_feed_valid, _verify_get_feeds_valid
-from flask import request
+from cosmos_db import CosmosDb
+from util import Util
 
 app = flask.Flask(__name__)
 
@@ -22,12 +20,7 @@ def health():
 @app.route('/api/create_feed', methods=['POST'])
 def create_feed():
     try:
-        link, markdown = _verify_create_feed_valid(request=request.get_json())
-        feed = {
-            'link': link,
-            'markdown': markdown,
-            'id': str(uuid.uuid4())
-        }
+        feed = util.verify_create_feed_valid(request=request.get_json())
         return cosmosDb.add_feed(feed)
 
     except Exception as e:
@@ -42,7 +35,6 @@ def create_feed():
 @app.route('/api/get_feeds', methods=['GET'])
 def get_feeds():
     try:
-        _verify_get_feeds_valid(request=request)
         return cosmosDb.read_feeds()
     except Exception as e:
         if hasattr(e, "code") and e.code is not None:
@@ -56,6 +48,7 @@ def get_feeds():
 if __name__ == "__main__":
     load_dotenv(dotenv_path='./.env', override=False)
     cosmosDb = CosmosDb()
+    util = Util()
 
     print("Starting Python on http://{}:{}".format(chosen_host, chosen_port))
     serve(app, host=chosen_host, port=chosen_port)
