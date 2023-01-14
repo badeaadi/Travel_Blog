@@ -2,7 +2,7 @@ import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
-import { BASE_URL, UserToken } from "../../../types";
+import { AUTH_BASE_URL, UserToken } from "../../../types";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -20,7 +20,7 @@ export const authOptions: AuthOptions = {
         },
         async authorize(credentials) {
             try {
-                const res: any = await axios.post(`${BASE_URL}/api/User/login`, credentials);
+                const res: any = await axios.post(`${AUTH_BASE_URL}/api/User/login`, credentials);
                 const userData = (jwt.decode(res.data.token) as UserToken);
 
                 // Cannot override returned data, therefore we need to use some fields as other fields

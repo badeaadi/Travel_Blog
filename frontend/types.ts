@@ -1,4 +1,6 @@
-export const BASE_URL = 'http://traver-blog-nst-srv-dns.northeurope.cloudapp.azure.com/identity';
+export const AUTH_BASE_URL = 'http://traver-blog-nst-srv-dns.northeurope.cloudapp.azure.com/identity';
+
+export const FEED_BASE_URL = 'http://traver-blog-nst-srv-dns.northeurope.cloudapp.azure.com/blog_manager';
 
 export interface UserCreate {
     email: string,
@@ -16,4 +18,14 @@ export interface UserToken {
 export interface UserData extends UserToken {
     firstName: string,
     lastName: string
+}
+
+export interface FeedData {
+    _ts: number;
+    content: string;
+    id: string;
+    photo: string;
+    summary: string;
+    title: string;
+    user: string;
 }

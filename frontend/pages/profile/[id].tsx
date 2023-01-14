@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import axios from 'axios';
-import { BASE_URL, UserData } from '../../types';
+import { AUTH_BASE_URL, UserData } from '../../types';
 
 export default function Profile(props: UserData) {
     const router = useRouter()
@@ -27,7 +27,7 @@ export default function Profile(props: UserData) {
 export async function getServerSideProps(context: { query: { id: string; }; }) {
     const id = context.query.id;
 
-    const userResponse = await axios.get(`${BASE_URL}/api/User/${id}`);
+    const userResponse = await axios.get(`${AUTH_BASE_URL}/api/User/${id}`);
 
     console.log(userResponse.data);
 

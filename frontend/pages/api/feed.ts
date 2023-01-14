@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios';
-import { AUTH_BASE_URL } from '../../../types';
+import { FEED_BASE_URL } from '../../types';
 
 type Data = {
     message: string
@@ -13,9 +13,9 @@ export default async function handler(
 ) {
     if (req.method === 'POST') {
         try {
-            const response = await axios.post(`${AUTH_BASE_URL}/api/User/register`, req.body);
+            const response = await axios.post(`${FEED_BASE_URL}/api/create_feed`, req.body);
             return res.status(201).send({
-                message: 'User created successfully'
+                message: response.data
             });
         } catch (error) {
             console.log(error);

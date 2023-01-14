@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import axios from 'axios';
-import { BASE_URL, UserData, UserToken } from '../../types';
+import { AUTH_BASE_URL, UserData, UserToken } from '../../types';
 import { getSession, useSession } from 'next-auth/react';
 import { AuthOptions, unstable_getServerSession } from 'next-auth';
 import { authOptions } from '../api/auth/[...nextauth]';
@@ -8,9 +8,6 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default function Profile(props: UserData) {
-    const { data: session } = useSession()
-    const router = useRouter();
-
 	return (
 		<div className="m-4 p-8 grid grid-cols-1 gap-4 lg:w-1/2 mx-auto">
             <div className="flex">
@@ -43,7 +40,7 @@ export async function getServerSideProps(context: { req: (IncomingMessage & { co
         }
     }
 
-    const userResponse = await axios.get(`${BASE_URL}/api/User/${session.user.name}`);
+    const userResponse = await axios.get(`${AUTH_BASE_URL}/api/User/${session.user.name}`);
 
     return {
         props: {

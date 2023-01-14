@@ -1,61 +1,13 @@
+import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import readingTime from 'reading-time';
+import { AUTH_BASE_URL, FeedData, FEED_BASE_URL, UserData } from '../../types';
+import { format } from 'date-fns'
 
 interface BlogProps {
-    title: string;
-    summary: string;
+    feed: FeedData,
+    author: Omit<UserData, "jwt">
 }
-
-const mockMD = `
-## Illa poscere arboris armatur levatus
-
-Lorem markdownum sumpto natasque caelo palluit postes et vocis semper, amor.
-Nuper fuit vitam, sed non causa spatio bicorni quae virtutem quoque sustinet
-sparsas alternae se somni. Matri retinacula Cypriae carinam: protinus tumulo!
-Nulloque tabellae Phoebum ea mentita
-[tollit](http://et-anhelatos.org/raucis-ager.html) adire; et hac nam Philomela
-spoliat iungit, manu. Genetrix interea, via hanc moveri: iuga novitate,
-Cepheaque nec Phineus, puellis.
-
-## Deceat femina laudat ora dentibus
-
-Cremarat volventia capillis titubare vacuam Cerberei habet concubitusque utere
-sua currus quoque sanus. Nisi laesi propositique iaculum tendentemque primo
-Iovis foliis perdidimus de novem fluvialis.
-
-1. Aut est
-2. Procumbere Ioles granum per hominumque gaudet matrisque
-3. Guttura quaque
-4. Murmur armis illo raptos sedere
-
-## Lacerto vacuus tutior afuerunt flectique bracchia cetera
-
-Amori cum secuta taedae et magno, non manusque nocte operisque sinus, a? Capere
-timor, quicquam frena, quia vale undis Dolopum *laturus* adstitit eburnea?
-
-- Alta tellus brumalis modo nec declivibus
-- Quacumque freta
-- Qua ut huic deducere favent pater
-
-## Mater duarum maturuit rogant terraeque in oblivia
-
-Hymettia usum, **est parum teque** victor! Ore vides factique aeternum bella huc
-adnuerant; vasti calido. Tristia et et voce habenti invenio cunctisque pudori
-perque sibi concurrere esse, cortinaque visus famularia ova. Aer moriens
-**pariter eandem sonitum** pellis inquit, naturale coniugis **discutit** Phinea,
-canum gulae crede praereptaque.
-
-## Omnis Iove eodem illo his hoste
-
-Meruique si Solem patriae fertur superest generatus siccare, est
-[quod](http://ut.net/nostrisanimal.aspx) Solem pulcherrima, caede; caecos vivit
-per. *Flavescere* venti vix domuit, fratres Hypsipyles Amyntor mea fata. Litora
-nescio quamvis: pavidum oculos.
-
-Veni vale cessit mons, mea ipse maturus receptae deos non caelum tam aries
-gemitumque altera. Boves dum, genitoris vincite, vade tectura **munera
-dominum**. Consistite pignus.
-`
 
 export default function Blog(props: BlogProps) {
 
@@ -68,20 +20,20 @@ export default function Blog(props: BlogProps) {
                     </div>
                 </div>
                 <div className="ml-4">
-                    <p className="font-semibold">Autor Autorescu</p>
+                    <p className="font-semibold">{props.author.firstName} {props.author.lastName}</p>
                     <div>
-                        <p className="inline font-thin text-sm align-text-bottom">21 January 2023</p>
+                        <p className="inline font-thin text-sm align-text-bottom">{format(new Date(props.feed._ts * 1000), 'd MMMM yyyy, HH:mm')}</p>
                         <p className="inline font-bold tracking-widest ml-2">·</p>
-                        <p className="inline font-thin text-sm align-text-bottom ml-2">{readingTime(mockMD).text}</p>
+                        <p className="inline font-thin text-sm align-text-bottom ml-2">{readingTime(props.feed.content).text}</p>
                     </div>
                 </div>
             </div>
 
-            <h1 className="text-4xl font-bold">Lorem ipsum</h1>
-            <p className="text-lg">Lorem lorem lorem lorem lorem lorem lorem</p>
-            <img className="mx-auto w-full" src="https://picsum.photos/800/400" />
+            <h1 className="text-4xl font-bold">{props.feed.title}</h1>
+            <p className="text-lg">{props.feed.summary}</p>
+            <img className="mx-auto w-full" src={props.feed.photo} />
             <div>
-                <ReactMarkdown className='leading-relaxed space-y-4' children={mockMD} components={{
+                <ReactMarkdown className='leading-relaxed space-y-4' children={props.feed.content} components={{
                     h2({ children }) {
                         return (<div className='space-y-0'><p className='text-2xl font-semibold'>{children}</p><div className="divider"></div></div>);
                     },
@@ -104,4 +56,31 @@ export default function Blog(props: BlogProps) {
             </div>
         </div>
     );
+}
+
+export async function getServerSideProps(context: { query: { id: string; }; }) {
+    const feedReq = await axios.get(`${FEED_BASE_URL}/api/get_feeds`);
+
+    const feeds: FeedData[] = feedReq.data;
+
+    console.log(feeds);
+    const feed = feeds.find(x => x.id === context.query.id);
+
+    if (!feed) {
+        return {
+            redirect: {
+                permanent: false,
+                destination: '/404'
+            }
+        }
+    }
+
+    const authorReq = await axios.get(`${AUTH_BASE_URL}/api/User/${feed.user}`);
+
+    return {
+        props: {
+            feed,
+            author: authorReq.data
+        }
+    }
 }

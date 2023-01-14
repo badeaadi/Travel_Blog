@@ -10,8 +10,8 @@ interface BlogCardProps {
 export default function BlogCard(props: BlogCardProps) {
     return (
         <>
-            <div className="card w-full bg-base-200 shadow-xl">
-                <figure><img src={`${props.photo}/400/225`} /></figure>
+            <div className="card w-full bg-base-200 shadow-xl max-w-md">
+                <figure><img src={`${props.photo}`} /></figure>
                 <div className="card-body">
                     <h2 className="card-title">{props.title}</h2>
                     <p>{props.summary}</p>
