@@ -4,7 +4,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Identity.API.Exceptions;
 using Identity.API.RequestObjects;
+using Identity.Domain.Dtos;
 using Identity.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -100,6 +102,23 @@ namespace Identity.API.Services
             {
                 Success = true,
                 Token = tokenHandler.WriteToken(token)
+            };
+        }
+
+        public async Task<ApiUserDto> GetUserByIdAsync(string userId)
+        {
+            var existingUser = await _userManager.FindByIdAsync(userId);
+
+            if (existingUser == null)
+            {
+                throw new UserNotFoundException("The requested user does not exist!");
+            }
+
+            return new ApiUserDto
+            {
+                Email = existingUser.Email,
+                FirstName = existingUser.FirstName,
+                LastName = existingUser.LastName
             };
         }
 

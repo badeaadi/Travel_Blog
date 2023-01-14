@@ -1,9 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Identity.API.Exceptions;
 using Identity.API.RequestObjects;
 using Identity.API.ResponseObjects;
-using Identity.API.ResultObjects.ResponseObjects;
 using Identity.API.Services;
+using Identity.Domain.Dtos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Identity.API.Controllers
@@ -66,6 +69,27 @@ namespace Identity.API.Controllers
             {
                 Token = authenticationResponse.Token
             });
+        }
+
+        [HttpGet]
+        [Route("{userId}", Name = "Get user")]
+        [ProducesResponseType(typeof(ApiUserDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetUser([FromRoute] string userId)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(userId);
+
+                return Ok(user);
+            }
+            catch (UserNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
     }
 }
