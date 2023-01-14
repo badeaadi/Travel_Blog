@@ -7,9 +7,13 @@ export interface UserCreate {
     lastName: string
 }
 
-export interface User {
+export interface UserToken {
     email: string,
+    id: string,
+    jwt: string
+}
+
+export interface UserData extends UserToken {
     firstName: string,
-    lastName: string,
-    id: string
+    lastName: string
 }

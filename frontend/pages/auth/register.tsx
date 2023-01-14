@@ -1,7 +1,10 @@
 import { useState } from "react";
 import axios from "axios"
+import { useRouter } from "next/router";
 
 export default function Register() {
+    const router = useRouter();
+
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
@@ -44,6 +47,8 @@ export default function Register() {
                             lastName,
                             password
                         })
+
+                        router.push('/auth/login');
                     }
                     }>Register</button>
                 </div>

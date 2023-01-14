@@ -4,8 +4,6 @@ import Link from "next/link";
 export default function Navigation() {
     const { data: session, status } = useSession()
 
-    console.log(session);
-
     return (
         <>
             <div className="navbar bg-base-200">
@@ -18,6 +16,7 @@ export default function Navigation() {
                             <li><Link href="/">Home</Link></li>
                             <li><Link href="/top-cities">Top orase</Link></li>
                             <li><Link href="/feed">Feed</Link></li>
+                            {status === 'unauthenticated' && <li><Link href="/auth/register">Register</Link></li>}
                         </ul>
                     </div>
                     <a className="btn btn-ghost normal-case text-xl">TravelBlog</a>
@@ -27,6 +26,7 @@ export default function Navigation() {
                         <li><Link href="/">Home</Link></li>
                         <li><Link href="/top-cities">Top orase</Link></li>
                         <li><Link href="/feed">Feed</Link></li>
+                        {status === 'unauthenticated' && <li><Link href="/auth/register">Register</Link></li>}
                     </ul>
                 </div>
                 <div className="navbar-end">
