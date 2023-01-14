@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Identity.API.RequestObjects
+﻿namespace Identity.API.RequestObjects
 {
     public class UserLoginRequest
     {

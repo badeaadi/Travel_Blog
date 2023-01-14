@@ -24,6 +24,13 @@ stages:
                       helmVersion: 3.9.0
                       checkLatestHelmVersion: false
 
+                - task: AzureKeyVault@2
+                  displayName: '[Configure] Read database connection string from config kv'
+                  inputs:
+                    ConnectedServiceName: travel-blog-service-connection
+                    keyVaultName: travel-blog-nst-kv
+                    secretsFilter: CosmosDbAccountKey
+
                 - task: AzureCli@2
                   displayName : "[deploy] Setup K8 credentials"
                   name: setup_kubernetes
@@ -37,5 +44,5 @@ stages:
                         --name ${{ parameters.azureKubernetesCluster }} --overwrite-existing
 
                 - script: |
-                    helm upgrade ${{ parameters.artifact }}-app ${{ parameters.chartPath }} --debug --install --timeout 300s --set buildTag=$(Build.BuildNumber)
+                    helm upgrade ${{ parameters.artifact }}-app ${{ parameters.chartPath }} --debug --install --timeout 300s --set buildTag=$(Build.BuildNumber) --set CosmosDbAccountKey=$(CosmosDbAccountKey)
                   displayName: '[deploy] Helm upgrade'

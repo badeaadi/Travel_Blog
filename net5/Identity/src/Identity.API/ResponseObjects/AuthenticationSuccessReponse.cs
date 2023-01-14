@@ -1,4 +1,4 @@
-﻿namespace Identity.API.ResultObjects.ResponseObjects
+﻿namespace Identity.API.ResponseObjects
 {
     public class AuthenticationSuccessResponse
     {
