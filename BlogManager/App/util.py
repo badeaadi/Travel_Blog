@@ -33,4 +33,4 @@ class Util:
             raise Exception
 
         decoded = jwt.decode(token, options={"verify_signature": False}, algorithms=["HS256"])
-        return decoded['id']
+        return decoded['sub']
