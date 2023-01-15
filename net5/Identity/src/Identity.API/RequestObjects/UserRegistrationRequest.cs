@@ -12,5 +12,7 @@ namespace Identity.API.RequestObjects
         public string FirstName { get; set; }
         
         public string LastName { get; set; }
+        
+        public string ThumbnailUrl { get; set; }
     }
 }

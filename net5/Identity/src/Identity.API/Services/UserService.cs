@@ -43,7 +43,8 @@ namespace Identity.API.Services
                 Email = request.Email,
                 UserName = request.Email,
                 FirstName = request.FirstName,
-                LastName = request.LastName
+                LastName = request.LastName,
+                ThumbnailUrl = request.ThumbnailUrl
             };
 
             var createdUser = await _userManager.CreateAsync(newUser, request.Password);
@@ -120,7 +121,8 @@ namespace Identity.API.Services
             {
                 Email = existingUser.Email,
                 FirstName = existingUser.FirstName,
-                LastName = existingUser.LastName
+                LastName = existingUser.LastName,
+                ThumbnailUrl = existingUser.ThumbnailUrl
             };
         }
 
