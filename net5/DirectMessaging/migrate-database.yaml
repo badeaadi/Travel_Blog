@@ -1,0 +1,44 @@
+parameters:
+  condition: succeeded()
+  dependsOn: [ ]
+  artifactDownloadPath: $(PIPELINE.WORKSPACE)/resourceCI
+
+jobs:
+  - job: migrate
+    displayName: 'Migrate database schema'
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: ${{ parameters.condition }}
+    pool:
+      vmImage: "ubuntu-latest"
+
+    steps:
+      - task: AzureKeyVault@2
+        displayName: '[Configure] Read database connection string from config kv'
+        inputs:
+          ConnectedServiceName: travel-blog-service-connection
+          keyVaultName: travel-blog-nst-kv
+          secretsFilter: >
+            DatabaseConnection-DirectMessaging-ConnectionString
+
+      - task: PowerShell@2
+        displayName: '[Configure] Set connection string variable'
+        inputs:
+          pwsh: true
+          targetType: inline
+          script: |
+            $connectionString = '$(DatabaseConnection-DirectMessaging-ConnectionString)'
+            Write-Host "##vso[task.setvariable variable=dbConnectionString;issecret=true]$connectionString"
+
+      - task: DownloadPipelineArtifact@2
+        displayName: '[Migrate] Download data migrator'
+        inputs:
+          artifact: 'data_migrator'
+          path: ${{ parameters.artifactDownloadPath }}
+
+      - task: PowerShell@2
+        displayName: '[Migrate] Run data migrator'
+        inputs:
+          targetType: inline
+          workingDirectory: "${{ parameters.artifactDownloadPath }}"
+          script: |
+            dotnet DirectMessaging.DataMigrator.dll -c "$(dbConnectionString)"

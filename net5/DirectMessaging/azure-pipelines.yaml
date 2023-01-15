@@ -1,0 +1,49 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - DirectMessaging/
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - DirectMessaging/
+
+stages:
+  - stage: CI
+    displayName: "Build"
+    dependsOn: [ ]
+    jobs:
+      - template: ./azure-pipelines-ci.yaml
+        parameters:
+          artifact: 'direct-messaging'
+          workingDirectory: 'net5/DirectMessaging'
+
+  - stage: Configuration_nst
+    dependsOn: [ ]
+    displayName: "Configuration nst"
+    jobs:
+      - template: ./configuration/generate.yaml
+
+  - stage: Migrate
+    displayName: "Migrate"
+    dependsOn: [ 'CI', 'Configuration_nst' ]
+    jobs:
+      - template: ./migrate-database.yaml
+
+  - stage: CD
+    displayName: "Deploy"
+    dependsOn: [ 'Migrate', "Configuration_nst" ]
+    jobs:
+      - template: ./azure-pipelines-cd.yaml
+        parameters:
+          artifact: 'direct-messaging'
+          workingDirectory: 'net5/DirectMessaging'
+          azureResourceGroup: 'travel-blog-nst-rg'
+          azureKubernetesCluster: 'travel-blog-nst-aks'

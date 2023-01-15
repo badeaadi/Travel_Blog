@@ -1,0 +1,54 @@
+parameters:
+  HelmVersion: ''
+  ChartPath: ''
+  ArtifactName: ''
+  PathToPublish: ''
+  ServiceName: ''
+
+steps:
+  - task: HelmInstaller@1
+    displayName: '[Helm] Install version ${{ parameters.HelmVersion }}'
+    inputs:
+      helmVersionToInstall: '${{ parameters.HelmVersion }}'
+
+  - task: PowerShell@2
+    displayName: '[Helm] Generate values folder'
+    inputs:
+      pwsh: true
+      targetType: inline
+      script: |
+        $valuesFolder = "${{ parameters.ChartPath }}/values"
+        if (!(Test-Path $$valuesFolder)) {
+          New-Item -ItemType Directory -Path $valuesFolder -Force
+          Out-File -FilePath "${valuesFolder}/empty.yml" -InputObject "# empty file" -Encoding ASCII
+        }
+
+  - task: PublishPipelineArtifact@1
+    displayName: '[Helm] Generate values'
+    inputs:
+      artifactName: '${{ parameters.ServiceName }}-values'
+      targetPath: '${{ parameters.ChartPath }}/values'
+
+  - bash: |
+      rm -rf ${{ parameters.CHartPath}}/values
+    displayName: '[Helm] Cleanup before chart package'
+
+  - task: HelmDeploy@0
+    displayName: '[Helm] Lint chart'
+    inputs:
+      command: lint
+      connectionType: None
+      arguments: '${{ parameters.ChartPath }}'
+
+  - task: HelmDeploy@0
+    displayName: '[Helm] Package chart'
+    inputs:
+      command: package
+      chartPath: '${{ parameters.ChartPath }}'
+      save: false
+
+  - task: PublishPipelineArtifact@1
+    displayName: '[Helm] Publish chart'
+    inputs:
+      artifactName: '${{ parameters.ArtifactName }}'
+      targetPath: '${{ parameters.PathToPublish }}'
