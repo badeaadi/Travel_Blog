@@ -14,7 +14,7 @@ spec:
     - host: ""
       http:
         paths:
-          - path : /direct_messaging/swagger/?(.*)
+          - path : /direct-messaging/swagger/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:

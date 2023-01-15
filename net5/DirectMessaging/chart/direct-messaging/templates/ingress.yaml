@@ -14,7 +14,7 @@ spec:
     - host: ""
       http:
         paths:
-          - path : /direct_messaging/api/?(.*)
+          - path : /direct-messaging/api/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
