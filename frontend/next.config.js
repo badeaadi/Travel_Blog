@@ -4,7 +4,16 @@ const removeImports = require('next-remove-imports')();
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: "standalone"
+  output: "standalone",
+
+  async rewrites() {
+    return [
+      {
+        source: '/api/User/:id*',
+        destination: `http://traver-blog-nst-srv-dns.northeurope.cloudapp.azure.com/identity/api/User/:id*`
+      }
+    ]
+  }
 }
 
 module.exports = removeImports(nextConfig);

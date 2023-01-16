@@ -23,11 +23,13 @@ export const authOptions: AuthOptions = {
                 const res: any = await axios.post(`${AUTH_BASE_URL}/api/User/login`, credentials);
                 const userData = (jwt.decode(res.data.token) as UserToken);
 
+                console.log(':::', userData)
+
                 // Cannot override returned data, therefore we need to use some fields as other fields
                 const data = {
-                    id: userData.id,
+                    id: userData.sub,
                     email: userData.email,
-                    name: userData.id,
+                    name: userData.sub,
                     image: res.data.token
                 }
 

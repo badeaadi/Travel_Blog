@@ -13,7 +13,7 @@ export default function Profile(props: UserData) {
             <div className="flex">
                 <div className="avatar">
                     <div className="w-12 rounded-full">
-                        <img src="https://placeimg.com/192/192/people" />
+                        <img src={props.thumbnailUrl} />
                     </div>
                 </div>
                 <div className="ml-4">

@@ -9,6 +9,7 @@ export default function Register() {
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [thumbnailUrl, setThumbnailUrl] = useState("");
 
     return ( 
         <div className="m-4 p-4 grid grid-cols-1 gap-4 mx-auto">
@@ -28,6 +29,12 @@ export default function Register() {
                 </div>
                 <div className="form-control w-full max-w-xs mx-auto">
                     <label className="label">
+                        <span className="label-text">Thumbnail</span>
+                    </label>
+                    <input type="text" placeholder="Thumbnail Url" className="input input-bordered w-full max-w-xs" value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} />
+                </div>
+                <div className="form-control w-full max-w-xs mx-auto">
+                    <label className="label">
                         <span className="label-text">Email</span>
                     </label>
                     <input type="text" placeholder="Email" className="input input-bordered w-full max-w-xs" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -39,13 +46,14 @@ export default function Register() {
                     <input type="password" placeholder="Password" className="input input-bordered w-full max-w-xs" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 <div className="form-control w-full max-w-xs mx-auto mt-4">
-                    <button className="btn btn-primary" onClick={(e) => {
+                    <button className="btn btn-primary" onClick={async (e) => {
                         e.preventDefault();
-                        axios.post('/api/auth/register', {
+                        await axios.post('/api/auth/register', {
                             email,
                             firstName,
                             lastName,
-                            password
+                            password,
+                            thumbnailUrl
                         })
 
                         router.push('/auth/login');

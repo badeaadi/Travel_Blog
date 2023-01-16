@@ -1,8 +1,20 @@
+import axios from "axios";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import useSWR from "swr";
+import { AUTH_BASE_URL } from "../types";
+
+const fetcher = (url: string) => axios.get(url, {
+    
+}).then((res) => res.data)
 
 export default function Navigation() {
     const { data: session, status } = useSession()
+
+    const { data, error } = useSWR(
+        `/api/User/${session?.user?.name}`,
+        fetcher
+    );
 
     return (
         <>
@@ -14,7 +26,6 @@ export default function Navigation() {
                         </label>
                         <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
                             <li><Link href="/">Home</Link></li>
-                            <li><Link href="/top-cities">Top orase</Link></li>
                             <li><Link href="/feed">Feed</Link></li>
                             {status === 'unauthenticated' && <li><Link href="/auth/register">Register</Link></li>}
                         </ul>
@@ -24,7 +35,6 @@ export default function Navigation() {
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
                         <li><Link href="/">Home</Link></li>
-                        <li><Link href="/top-cities">Top orase</Link></li>
                         <li><Link href="/feed">Feed</Link></li>
                         {status === 'unauthenticated' && <li><Link href="/auth/register">Register</Link></li>}
                     </ul>
@@ -33,7 +43,7 @@ export default function Navigation() {
                     {status === 'authenticated' && <div className="dropdown dropdown-end">
                         <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                             <div className="w-10 rounded-full">
-                                <img src="https://placeimg.com/80/80/people" alt="Profile" />
+                                <img src={data?.thumbnailUrl} alt="Profile" />
                             </div>
                         </label>
                         <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">

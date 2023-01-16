@@ -6,10 +6,12 @@ export interface UserCreate {
     email: string,
     password: string,
     firstName: string,
-    lastName: string
+    lastName: string,
+    thumbnailUrl: string
 }
 
 export interface UserToken {
+    sub: any;
     email: string,
     id: string,
     jwt: string
@@ -17,7 +19,8 @@ export interface UserToken {
 
 export interface UserData extends UserToken {
     firstName: string,
-    lastName: string
+    lastName: string,
+    thumbnailUrl: string
 }
 
 export interface FeedData {

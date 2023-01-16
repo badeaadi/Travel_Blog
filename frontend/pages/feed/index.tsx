@@ -26,7 +26,6 @@ export default function Feed(props: FeedProps) {
 export async function getServerSideProps() {
     const feedReq = await axios.get(`${FEED_BASE_URL}/api/get_feeds`);
 
-
     return {
         props: {
             feed: feedReq.data
