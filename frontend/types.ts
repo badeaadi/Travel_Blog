@@ -2,6 +2,8 @@ export const AUTH_BASE_URL = 'http://traver-blog-nst-srv-dns.northeurope.cloudap
 
 export const FEED_BASE_URL = 'http://traver-blog-nst-srv-dns.northeurope.cloudapp.azure.com/blog_manager';
 
+export const CHAT_BASE_URL = 'http://traver-blog-nst-srv-dns.northeurope.cloudapp.azure.com/direct-messaging';
+
 export interface UserCreate {
     email: string,
     password: string,
@@ -15,6 +17,13 @@ export interface UserToken {
     email: string,
     id: string,
     jwt: string
+}
+
+export interface ChatMessage {
+    content: string,
+    createdAt: Date,
+    senderId: string,
+    receiverId: string
 }
 
 export interface UserData extends UserToken {

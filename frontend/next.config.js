@@ -11,6 +11,10 @@ const nextConfig = {
       {
         source: '/api/User/:id*',
         destination: `http://traver-blog-nst-srv-dns.northeurope.cloudapp.azure.com/identity/api/User/:id*`
+      },
+      {
+        source: '/api/Chat/:id*',
+        destination: `http://traver-blog-nst-srv-dns.northeurope.cloudapp.azure.com/direct-messaging/api/Message/to/:id*`
       }
     ]
   }
