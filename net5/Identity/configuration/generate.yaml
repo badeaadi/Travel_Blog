@@ -21,6 +21,7 @@ jobs:
                 keyVaultName: travel-blog-nst-kv
                 secretsFilter: >
                   DatabaseConnection-Identity-ConnectionString,
+                  Identity-Jwt-Issuer,      
                   Identity-Jwt-SigningKey
 
             - task: PowerShell@2
@@ -33,6 +34,7 @@ jobs:
                   $yaml = '
                   secrets:
                       Database__ConnectionString: "$(DatabaseConnection-Identity-ConnectionString)"
+                      JwtOptions__Issuer: "$(Identity-Jwt-Issuer)"
                       JwtOptions__SigningKey: "$(Identity-Jwt-SigningKey)"
                   '
                   $yaml_encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${yaml}"))

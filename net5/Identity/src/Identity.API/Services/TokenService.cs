@@ -19,14 +19,16 @@ public class TokenService : ITokenService
     public async Task<TokenValidationResult> ValidateTokenAsync(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
+        var issuer = _jwtOptions.Issuer;
         var key = Encoding.ASCII.GetBytes(_jwtOptions.SigningKey);
 
         var validationResult = await tokenHandler.ValidateTokenAsync(token, new TokenValidationParameters
             {
+                ValidIssuer = issuer,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = false,
-                ValidateAudience = false
+                ValidateIssuer = true,
+                ValidateAudience = false,
             });
 
         return new TokenValidationResult

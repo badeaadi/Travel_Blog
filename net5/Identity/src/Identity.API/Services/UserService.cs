@@ -43,7 +43,8 @@ namespace Identity.API.Services
                 Email = request.Email,
                 UserName = request.Email,
                 FirstName = request.FirstName,
-                LastName = request.LastName
+                LastName = request.LastName,
+                ThumbnailUrl = request.ThumbnailUrl
             };
 
             var createdUser = await _userManager.CreateAsync(newUser, request.Password);
@@ -58,8 +59,9 @@ namespace Identity.API.Services
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
+            var issuer = _jwtOptions.Issuer;
             var key = Encoding.ASCII.GetBytes(_jwtOptions.SigningKey);
-            var tokenDescriptor = GenerateSecurityTokenDescriptor(newUser, key);
+            var tokenDescriptor = GenerateSecurityTokenDescriptor(newUser, issuer, key);
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
@@ -93,8 +95,9 @@ namespace Identity.API.Services
             }
             
             var tokenHandler = new JwtSecurityTokenHandler();
+            var issuer = _jwtOptions.Issuer;
             var key = Encoding.ASCII.GetBytes(_jwtOptions.SigningKey);
-            var tokenDescriptor = GenerateSecurityTokenDescriptor(existingUser, key);
+            var tokenDescriptor = GenerateSecurityTokenDescriptor(existingUser, issuer, key);
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
@@ -118,23 +121,24 @@ namespace Identity.API.Services
             {
                 Email = existingUser.Email,
                 FirstName = existingUser.FirstName,
-                LastName = existingUser.LastName
+                LastName = existingUser.LastName,
+                ThumbnailUrl = existingUser.ThumbnailUrl
             };
         }
 
-        private static SecurityTokenDescriptor GenerateSecurityTokenDescriptor(ApiUser newUser, byte[] key)
+        private static SecurityTokenDescriptor GenerateSecurityTokenDescriptor(ApiUser newUser, string issuer, byte[] key)
         {
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, newUser.Email),
+                    new Claim(JwtRegisteredClaimNames.Sub, newUser.Id),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, newUser.Email),
-                    new Claim("id", newUser.Id)
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                Issuer = issuer,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
             return tokenDescriptor;
         }

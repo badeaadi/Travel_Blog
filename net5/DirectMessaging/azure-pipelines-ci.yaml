@@ -1,0 +1,76 @@
+﻿parameters:
+  condition: succeeded()
+  dependsOn: [ ]
+  chartBaseFolder: 'chart'
+  artifact: ''
+  helmVersion: '3.3.1'
+  workingDirectory: ''
+
+jobs:
+  - job: build
+    displayName: 'Build DirectMessaging'
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: ${{ parameters.condition }}
+    pool:
+      vmImage: "ubuntu-latest"
+
+    steps:
+      - task: UseDotNet@2
+        displayName: 'Use .NET 6 SDK'
+        inputs:
+          packageType: sdk
+          version: 6.x
+
+      - template: ci.build-artifact.yaml
+        parameters:
+          workingDirectory: '${{ parameters.workingDirectory }}'
+
+      - powershell: |
+          dotnet publish ./${{ parameters.workingDirectory }}/src/DirectMessaging.Startup/ -c Release -r linux-x64 -o $(Build.ArtifactStagingDirectory)/direct-messaging
+        displayName: "[Docker] Publish dotnet artifacts for app"
+
+      - task: CopyFiles@2
+        displayName: "[Docker] Copy Dockerfile"
+        inputs:
+          SourceFolder: ${{ parameters.workingDirectory }}
+          Contents: Dockerfile
+          targetFolder: $(Build.ArtifactStagingDirectory)/direct-messaging
+
+      - task: Docker@1
+        displayName: "[Docker] Build image"
+        inputs:
+          azureSubscriptionEndpoint: travel-blog-service-connection
+          azureContainerRegistry: travelblogacr
+          dockerFile: '$(Build.ArtifactStagingDirectory)/${{ parameters.artifact }}/Dockerfile'
+          imageName: '${{ parameters.artifact }}:$(Build.BuildNumber)'
+          includeLatestTag: true
+
+      - task: AzureCLI@2
+        displayName: '[Docker] Push image'
+        inputs:
+          azureSubscription: travel-blog-service-connection
+          scriptType: bash
+          scriptLocation: inlineScript
+          addSpnToEnvironment: true
+          inlineScript: |
+              az acr login --name travelblogacr
+              docker tag travelblogacr/${{ parameters.artifact }}:$(Build.BuildNumber) travelblogacr.azurecr.io/${{ parameters.artifact }}:$(Build.BuildNumber)
+              docker push travelblogacr.azurecr.io/${{ parameters.artifact }}:$(Build.BuildNumber)
+
+      - template: ci.package-chart.yaml
+        parameters:
+          HelmVersion: ${{ parameters.helmVersion }}
+          ChartPath: ${{ parameters.WorkingDirectory }}/${{ parameters.chartBaseFolder }}/${{ parameters.artifact }}
+          ArtifactName: 'charts'
+          PathToPublish: '$(Build.ArtifactStagingDirectory)/${{ parameters.artifact }}-1.0.0.tgz'
+          ServiceName: ${{ parameters.artifact }}
+
+      - powershell: |
+          dotnet publish './${{ parameters.workingDirectory }}/src/DirectMessaging.DataMigrator/' -c Release -r linux-x64 -o $(Build.ArtifactStagingDirectory)/data_migrator
+        displayName: '[Schema] Publish dotnet artifacts for data migrator'
+
+      - task: PublishPipelineArtifact@1
+        displayName: '[Schema] Publish DataMigrator'
+        inputs:
+          artifactName: 'data_migrator'
+          targetPath: $(Build.ArtifactStagingDirectory)/data_migrator

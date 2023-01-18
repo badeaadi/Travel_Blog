@@ -1,0 +1,42 @@
+parameters:
+  condition: succeeded()
+  dependsOn: [ ]
+
+jobs:
+  - deployment: configuration_nst
+    displayName: 'Publish configuration management for nst'
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: ${{ parameters.condition }}
+    pool:
+      vmImage: "ubuntu-latest"
+    environment: "nst"
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: AzureKeyVault@2
+              displayName: '[Configure] Read data from config kv'
+              inputs:
+                ConnectedServiceName: travel-blog-service-connection
+                keyVaultName: travel-blog-nst-kv
+                secretsFilter: >
+                  DatabaseConnection-DirectMessaging-ConnectionString,
+                  Identity-Jwt-Issuer,      
+                  Identity-Jwt-SigningKey
+
+            - task: PowerShell@2
+              displayName: '[Configure] Generate secrets variable'
+              name: printSecrets
+              inputs:
+                pwsh: true
+                targetType: inline
+                script: |
+                  $yaml = '
+                  secrets:
+                      Database__ConnectionString: "$(DatabaseConnection-DirectMessaging-ConnectionString)"
+                      AuthOptions__Authority: "$(Identity-Jwt-Issuer)"
+                      AuthOptions__SigningKey: "$(Identity-Jwt-SigningKey)"
+                  '
+                  $yaml_encoded = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${yaml}"))
+                  Write-Host "##vso[task.setvariable variable=secrets;isOutput=true]${yaml_encoded}"
+      
